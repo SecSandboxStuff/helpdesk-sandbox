@@ -1,0 +1,23 @@
+ package com.secsandbox.helpdesk;
+ 
++import java.util.Set;
+ import org.springframework.stereotype.Service;
+ 
+ /**
+  * CWE-306 CRITICAL_EXEC surface: the antivirus sweep shells out, and the route
+  * that reaches it sits under /public/**, so no authentication is required to
+  * trigger it.
+  */
+ @Service
+ public class AttachmentScanService {
+ 
+     public int sweepAttachments(String attachmentDir) throws Exception {
++        Set<String> safeDirectories = Set.of("/safe/dir1", "/safe/dir2"); //TODO: add allowed directories here
++        if (!safeDirectories.contains(attachmentDir)) {
++            throw new IllegalArgumentException("Unauthorized directory: " + attachmentDir);
++        }
+         Process scan = Runtime.getRuntime().exec("/usr/local/bin/clamscan " + attachmentDir);
+         return scan.waitFor();
+     }
+ }
+ 
